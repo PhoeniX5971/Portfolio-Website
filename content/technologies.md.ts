@@ -1,7 +1,7 @@
 export const content = `# AI Technology Stack
 
 ## LLM Providers
-- OpenAI (GPT-4, GPT-3.5)
+- OpenAI
 - Anthropic (Claude)
 - Google Gemini
 - Ollama models

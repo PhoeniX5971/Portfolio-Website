@@ -164,3 +164,11 @@
     background: var(--terminal-prompt);
   }
 }
+
+@font-face {
+  font-family: "ProFont Nerd Font IIx";
+  src: url("/fonts/ProFontIIxNerdFont-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
