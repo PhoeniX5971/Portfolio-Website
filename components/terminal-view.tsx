@@ -112,7 +112,8 @@ export function TerminalView() {
         </div>
 
         {/* Right side: Project Browser */}
-        <div className="hidden md:block">
+        {/* Right side: Project Browser */}
+        <div className="hidden md:flex md:w-80 shrink-0 border-l border-terminal-border h-full overflow-hidden">
           <ProjectBrowser
             currentPath={currentPath}
             onPathChange={setCurrentPath}
