@@ -1,16 +1,32 @@
-"use client"
+"use client";
 
-import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { MarkdownRenderer } from "./markdown-renderer"
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MarkdownRenderer } from "./markdown-renderer";
+import { useEffect } from "react";
 
 interface MarkdownViewerProps {
-  content: string
-  filename: string
-  onClose: () => void
+  content: string;
+  filename: string;
+  onClose: () => void;
 }
 
-export function MarkdownViewer({ content, filename, onClose }: MarkdownViewerProps) {
+export function MarkdownViewer({
+  content,
+  filename,
+  onClose,
+}: MarkdownViewerProps) {
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
       <div className="relative w-[90vw] h-[85vh] max-w-5xl bg-terminal-bg border-2 border-terminal-border rounded-lg shadow-2xl flex flex-col">
@@ -31,15 +47,17 @@ export function MarkdownViewer({ content, filename, onClose }: MarkdownViewerPro
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-8 bg-terminal-bg/30">
+        <div className="flex-1 overflow-y-auto p-8 bg-terminal-bg/30 terminal-scrollbar">
           <MarkdownRenderer content={content} />
         </div>
 
         {/* Footer */}
         <div className="px-6 py-3 border-t border-terminal-border bg-terminal-bg/50">
-          <p className="text-terminal-muted text-xs font-mono">Press ESC or click the X button to close</p>
+          <p className="text-terminal-muted text-xs font-mono">
+            Press ESC or click the X button to close
+          </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

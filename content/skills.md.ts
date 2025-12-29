@@ -22,4 +22,4 @@ export const content = `# Skills & Expertise
 - **System & Bots**: Discord.py
 - **Speech**: Coqui TTS, Whisper/FasterWhisper, VAD (Voice Activation Detection)
 - **DevOps & Tooling**: Docker, GitHub, Postman
-`;
+`

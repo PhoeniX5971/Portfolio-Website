@@ -7,7 +7,7 @@ interface BootAnimationProps {
 }
 
 const bootMessages = [
-  { text: "Initializing portfolio system...", delay: 100 },
+  { text: "Initializing Phoenix Portfolio system...", delay: 100 },
   { text: "Loading kernel modules", delay: 150 },
   { text: "  [OK] filesystem.ko", delay: 80 },
   { text: "  [OK] terminal.ko", delay: 80 },

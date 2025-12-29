@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,12 +29,11 @@ export function ThemeSwitcher() {
     root.style.setProperty("--terminal-error", theme.colors.error);
     root.style.setProperty("--terminal-success", theme.colors.success);
     root.style.setProperty("--terminal-warning", theme.colors.warning);
+    root.style.setProperty("--popover", theme.colors.terminalBg);
+    root.style.setProperty("--popover-foreground", theme.colors.terminalFg);
+    root.style.setProperty("--card", theme.colors.terminalBg);
+    root.style.setProperty("--card-foreground", theme.colors.terminalFg);
   };
-
-  // apply default theme on first load
-  useEffect(() => {
-    applyTheme(themes[0].id);
-  }, []);
 
   return (
     <DropdownMenu>
@@ -42,40 +41,21 @@ export function ThemeSwitcher() {
         <Button
           variant="ghost"
           size="sm"
-          className="
-            gap-2
-            text-terminal-fg
-            border border-terminal-border
-            hover:bg-terminal-accent
-            hover:text-terminal-bg
-            transition-colors
-          "
+          className="gap-2 text-terminal-fg hover:text-terminal-accent hover:bg-terminal-border/30"
         >
           <Palette className="h-4 w-4" />
           <span className="hidden sm:inline">{currentTheme.name}</span>
         </Button>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent
         align="end"
-        className="
-          bg-terminal-bg
-          text-terminal-fg
-          border border-terminal-border
-          shadow-lg
-        "
+        className="bg-terminal-bg border-terminal-border"
       >
         {themes.map((theme) => (
           <DropdownMenuItem
             key={theme.id}
             onClick={() => applyTheme(theme.id)}
-            className="
-              cursor-pointer
-              hover:bg-terminal-accent
-              hover:text-terminal-bg
-              focus:bg-terminal-accent
-              focus:text-terminal-bg
-            "
+            className="text-terminal-fg hover:bg-terminal-border/30 hover:text-terminal-accent focus:bg-terminal-border/30 focus:text-terminal-accent"
           >
             {theme.name}
           </DropdownMenuItem>

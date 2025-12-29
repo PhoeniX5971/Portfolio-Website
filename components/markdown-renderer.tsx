@@ -11,7 +11,7 @@ interface MarkdownRendererProps {
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
     <div
-      className="prose prose-invert max-w-none font-profont"
+      className="prose prose-invert max-w-none fonr-profont"
       style={{ fontFamily: '"ProFont Nerd Font IIx", monospace' }}
     >
       <ReactMarkdown

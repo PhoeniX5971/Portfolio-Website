@@ -103,4 +103,4 @@ export const content = `
 ### Languages
 - English (Fluent)  
 - Arabic (Native)
-`;
+`

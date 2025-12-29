@@ -6,4 +6,4 @@ export const content = `# Contact Information
 - **LinkedIn:** https://www.linkedin.com/in/phoenix5971/  
 - **GitHub:** https://github.com/PhoeniX5971
 - **Discord:** phoenix5971
-`;
+`

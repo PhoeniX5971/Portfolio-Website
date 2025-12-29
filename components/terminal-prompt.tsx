@@ -6,7 +6,7 @@ interface TerminalPromptProps {
   currentPath: string
 }
 
-export function TerminalPrompt({ username = "visitor", hostname = "portfolio", currentPath }: TerminalPromptProps) {
+export function TerminalPrompt({ username = "phoenix", hostname = "portfolio", currentPath }: TerminalPromptProps) {
   return (
     <div className="flex items-center gap-2 font-mono text-sm">
       <span className="text-terminal-success">{username}</span>

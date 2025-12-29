@@ -177,11 +177,10 @@ export const commands: Record<string, Command> = {
     execute: () => {
       return {
         output: [
-          "visitor@portfolio",
+          "phoenix@portfolio",
           "",
-          "You are viewing a portfolio terminal system.",
-          'Navigate through directories using "cd" and explore projects.',
-          'Type "help" for available commands.',
+          "AI systems developer focused on agentic architectures,",
+          "long-term memory, and real-world system integration.",
         ],
       }
     },

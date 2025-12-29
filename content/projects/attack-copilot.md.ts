@@ -45,11 +45,10 @@ Attack Copilot is an intelligent LLM-driven tool designed for **purple team work
 - Automated collection, analysis, and validation of attack simulations
 
 **Note:** Not open-sourced yet. Contains proprietary components under evaluation for potential commercial release. Proof-of-concept video demonstration will be available soon.
-`;
+`
 
 export const metadata = {
-  description:
-    "AI-driven multi-agent system for Microsoft Active Directory assessment and purple-team workflows",
+  description: "AI-driven multi-agent system for Microsoft Active Directory assessment and purple-team workflows",
   tags: [
     "Cybersecurity",
     "Generative AI",
@@ -59,4 +58,4 @@ export const metadata = {
     "Multi-Step Reasoning",
   ],
   runnable: false,
-};
+}

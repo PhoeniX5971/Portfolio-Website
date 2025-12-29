@@ -45,7 +45,7 @@ export function ProjectBrowser({
     const isCurrent =
       currentPath === fullPath || (currentPath === "~" && fullPath === "~");
 
-    const depthOffset = node.type === "file" ? 24 : 0;
+    const depthOffset = node.type === "file" ? 25 : 0;
     return (
       <div key={fullPath}>
         <button

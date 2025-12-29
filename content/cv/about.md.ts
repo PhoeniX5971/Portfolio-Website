@@ -17,4 +17,4 @@ Beyond model interaction, I focus heavily on **practical integration**—connect
 - AI memory optimization and retrieval strategies  
 - Autonomous and semi-autonomous agents  
 - Security-aware AI tooling
-`;
+`

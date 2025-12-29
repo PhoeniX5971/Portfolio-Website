@@ -16,4 +16,4 @@ export const content = `# AI Technology Stack
 - Content filtering
 - Rate limiting
 - Cost tracking
-`;
+`
