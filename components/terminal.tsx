@@ -34,6 +34,7 @@ export function Terminal({ onPathChange, onRunProject, onLog }: TerminalProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const prevSuggestionsCount = useRef(0);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -57,6 +58,23 @@ export function Terminal({ onPathChange, onRunProject, onLog }: TerminalProps) {
       setSuggestions([]);
     }
   }, [input, currentPath]);
+
+  useEffect(() => {
+    if (
+      suggestions.length > 0 &&
+      prevSuggestionsCount.current === 0 &&
+      scrollRef.current
+    ) {
+      requestAnimationFrame(() => {
+        scrollRef.current!.scrollTo({
+          top: scrollRef.current!.scrollHeight,
+          behavior: "smooth",
+        });
+      });
+    }
+
+    prevSuggestionsCount.current = suggestions.length;
+  }, [suggestions]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     // Tab for autocomplete
@@ -165,29 +183,16 @@ export function Terminal({ onPathChange, onRunProject, onLog }: TerminalProps) {
     }
   };
 
-  const prevSuggestionsCount = useRef(0);
+  const handleTerminalClick = () => {
+    inputRef.current?.focus();
+  };
 
-  useEffect(() => {
-    if (
-      suggestions.length > 0 &&
-      prevSuggestionsCount.current === 0 &&
-      scrollRef.current
-    ) {
-      requestAnimationFrame(() => {
-        scrollRef.current!.scrollTo({
-          top: scrollRef.current!.scrollHeight,
-          behavior: "smooth",
-        });
-      });
-    }
-
-    prevSuggestionsCount.current = suggestions.length;
-  }, [suggestions]);
   return (
     <div className="flex h-full flex-col bg-terminal-bg relative">
       <div
         ref={scrollRef}
-        className="terminal-scrollbar flex-1 overflow-y-auto p-4"
+        className="terminal-scrollbar flex-1 overflow-y-auto p-4 cursor-text"
+        onClick={handleTerminalClick}
       >
         {lines.map((line, idx) => (
           <div key={idx} className="mb-1">

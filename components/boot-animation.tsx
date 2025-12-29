@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
 interface BootAnimationProps {
-  onComplete: () => void
+  onComplete: () => void;
 }
 
 const bootMessages = [
@@ -24,26 +24,25 @@ const bootMessages = [
   { text: "  backend logger [started]", delay: 80 },
   { text: "  markdown renderer [started]", delay: 80 },
   { text: "", delay: 100 },
-  { text: 'System ready. Type "help" for available commands.', delay: 200 },
-]
+];
 
 export function BootAnimation({ onComplete }: BootAnimationProps) {
-  const [messages, setMessages] = useState<string[]>([])
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [messages, setMessages] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     if (currentIndex >= bootMessages.length) {
-      setTimeout(onComplete, 500)
-      return
+      setTimeout(onComplete, 800);
+      return;
     }
 
     const timer = setTimeout(() => {
-      setMessages((prev) => [...prev, bootMessages[currentIndex].text])
-      setCurrentIndex((prev) => prev + 1)
-    }, bootMessages[currentIndex].delay)
+      setMessages((prev) => [...prev, bootMessages[currentIndex].text]);
+      setCurrentIndex((prev) => prev + 1);
+    }, bootMessages[currentIndex].delay);
 
-    return () => clearTimeout(timer)
-  }, [currentIndex, onComplete])
+    return () => clearTimeout(timer);
+  }, [currentIndex, onComplete]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-terminal-bg">
@@ -69,5 +68,5 @@ export function BootAnimation({ onComplete }: BootAnimationProps) {
         )}
       </div>
     </div>
-  )
+  );
 }
