@@ -1,16 +1,24 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
 interface TutorialAnimationProps {
-  onComplete: () => void
+  onComplete: () => void;
 }
 
 const tutorialSteps = [
   { text: "", delay: 300 },
-  { text: "Welcome to Phoenix Portfolio", delay: 150, className: "text-terminal-accent text-lg font-semibold" },
+  {
+    text: "Welcome to Phoenix Portfolio",
+    delay: 150,
+    className: "text-terminal-accent text-lg font-semibold",
+  },
   { text: "", delay: 100 },
-  { text: "Quick Navigation Guide:", delay: 120, className: "text-terminal-success" },
+  {
+    text: "Quick Navigation Guide:",
+    delay: 120,
+    className: "text-terminal-success",
+  },
   { text: "", delay: 80 },
   { text: '  • Type "help" to see all available commands', delay: 100 },
   { text: '  • Use "ls" to list directories', delay: 100 },
@@ -18,48 +26,56 @@ const tutorialSteps = [
   { text: '  • Read files with "cat <file>"', delay: 100 },
   { text: "  • Click files in the sidebar to open them", delay: 100 },
   { text: "", delay: 80 },
-  { text: "  • Press ↑/↓ for command history", delay: 100 },
+  { text: "  • Press / for command history", delay: 100 },
   { text: "  • Press Tab for autocompletion", delay: 100 },
   { text: "", delay: 80 },
-  { text: "Explore cv/, projects/, skills/, and technologies/", delay: 150, className: "text-terminal-warning" },
+  {
+    text: "Explore cv/, projects/, skills/, and technologies/",
+    delay: 150,
+    className: "text-terminal-warning",
+  },
   { text: "", delay: 100 },
-  { text: "Press any key to continue...", delay: 200, className: "text-terminal-prompt animate-pulse" },
-]
+  {
+    text: "Press any key to continue...",
+    delay: 200,
+    className: "text-terminal-prompt animate-pulse",
+  },
+];
 
 export function TutorialAnimation({ onComplete }: TutorialAnimationProps) {
-  const [messages, setMessages] = useState<typeof tutorialSteps>([])
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [canSkip, setCanSkip] = useState(false)
+  const [messages, setMessages] = useState<typeof tutorialSteps>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [canSkip, setCanSkip] = useState(false);
 
   useEffect(() => {
     if (currentIndex >= tutorialSteps.length) {
-      setCanSkip(true)
-      return
+      setCanSkip(true);
+      return;
     }
 
     const timer = setTimeout(() => {
-      setMessages((prev) => [...prev, tutorialSteps[currentIndex]])
-      setCurrentIndex((prev) => prev + 1)
-    }, tutorialSteps[currentIndex].delay)
+      setMessages((prev) => [...prev, tutorialSteps[currentIndex]]);
+      setCurrentIndex((prev) => prev + 1);
+    }, tutorialSteps[currentIndex].delay);
 
-    return () => clearTimeout(timer)
-  }, [currentIndex])
+    return () => clearTimeout(timer);
+  }, [currentIndex]);
 
   useEffect(() => {
-    if (!canSkip) return
+    if (!canSkip) return;
 
     const handleKeyPress = () => {
-      onComplete()
-    }
+      onComplete();
+    };
 
-    window.addEventListener("keydown", handleKeyPress)
-    window.addEventListener("click", handleKeyPress)
+    window.addEventListener("keydown", handleKeyPress);
+    window.addEventListener("click", handleKeyPress);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyPress)
-      window.removeEventListener("click", handleKeyPress)
-    }
-  }, [canSkip, onComplete])
+      window.removeEventListener("keydown", handleKeyPress);
+      window.removeEventListener("click", handleKeyPress);
+    };
+  }, [canSkip, onComplete]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-terminal-bg">
@@ -74,5 +90,5 @@ export function TutorialAnimation({ onComplete }: TutorialAnimationProps) {
         )}
       </div>
     </div>
-  )
+  );
 }
