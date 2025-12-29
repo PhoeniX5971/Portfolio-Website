@@ -191,7 +191,7 @@ export function Terminal({ onPathChange, onRunProject, onLog }: TerminalProps) {
     <div className="flex h-full flex-col bg-terminal-bg relative">
       <div
         ref={scrollRef}
-        className="terminal-scrollbar flex-1 overflow-y-auto p-4 cursor-text"
+        className="terminal-scrollbar flex-1 overflow-y-auto p-2 sm:p-4 cursor-text"
         onClick={handleTerminalClick}
       >
         {lines.map((line, idx) => (
@@ -199,16 +199,16 @@ export function Terminal({ onPathChange, onRunProject, onLog }: TerminalProps) {
             {line.type === "input" ? (
               <div className="flex items-center gap-2">
                 <TerminalPrompt currentPath={line.path || currentPath} />
-                <span className="font-mono text-sm text-terminal-fg">
+                <span className="font-mono text-xs sm:text-sm text-terminal-fg">
                   {line.content}
                 </span>
               </div>
             ) : line.type === "error" ? (
-              <div className="font-mono text-sm text-terminal-error">
+              <div className="font-mono text-xs sm:text-sm text-terminal-error">
                 {line.content}
               </div>
             ) : (
-              <div className="font-mono text-sm text-terminal-fg">
+              <div className="font-mono text-xs sm:text-sm text-terminal-fg">
                 {line.content}
               </div>
             )}
@@ -224,7 +224,7 @@ export function Terminal({ onPathChange, onRunProject, onLog }: TerminalProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent font-mono text-sm text-terminal-fg outline-none"
+            className="flex-1 bg-transparent font-mono text-xs sm:text-sm text-terminal-fg outline-none"
             spellCheck={false}
             autoComplete="off"
           />
@@ -238,7 +238,7 @@ export function Terminal({ onPathChange, onRunProject, onLog }: TerminalProps) {
             {suggestions.slice(0, 5).map((sugg, idx) => (
               <div
                 key={idx}
-                className={`font-mono text-xs ${
+                className={`font-mono text-xs sm:text-sm ${
                   idx === suggestionIndex % suggestions.length
                     ? "text-terminal-accent font-semibold"
                     : "text-terminal-fg"

@@ -7,6 +7,7 @@ import { ProjectBrowser } from "./project-browser";
 import { ThemeSwitcher } from "./theme-switcher";
 import { ProjectRunner } from "./project-runner";
 import { MarkdownViewer } from "./markdown-viewer";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 export function TerminalView() {
   const [currentPath, setCurrentPath] = useState("~");
@@ -22,6 +23,7 @@ export function TerminalView() {
     content: string;
     filename: string;
   } | null>(null);
+  const [showLogsOnMobile, setShowLogsOnMobile] = useState(false);
 
   const addLog = (
     message: string,
@@ -60,14 +62,14 @@ export function TerminalView() {
           <div className="h-3 w-3 rounded-full bg-terminal-error" />
           <div className="h-3 w-3 rounded-full bg-terminal-warning" />
           <div className="h-3 w-3 rounded-full bg-terminal-success" />
-          <span className="ml-2">Portfolio Terminal</span>
+          <span className="ml-2 hidden sm:inline">Phoenix Portfolio</span>
         </div>
         <ThemeSwitcher />
       </div>
 
       {/* Main content area */}
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex flex-1 flex-col border-r border-terminal-border overflow-hidden">
+      <div className="flex flex-1 flex-col md:flex-row overflow-hidden">
+        <div className="flex flex-1 flex-col md:border-r border-terminal-border overflow-hidden">
           {/* Terminal or Project Runner - Takes remaining space and scrolls */}
           <div className="flex-1 overflow-hidden">
             {runningProject ? (
@@ -85,18 +87,38 @@ export function TerminalView() {
             )}
           </div>
 
-          {/* Backend Logs - Fixed height, stays in place */}
-          <div className="h-64 border-t border-terminal-border z-0">
-            <BackendLogs logs={logs} />
+          {/* Backend Logs */}
+          <div className="md:h-64 border-t border-terminal-border">
+            <button
+              onClick={() => setShowLogsOnMobile(!showLogsOnMobile)}
+              className="md:hidden w-full flex items-center justify-between px-4 py-2 bg-terminal-bg border-b border-terminal-border"
+            >
+              <span className="font-mono text-xs font-semibold uppercase text-terminal-fg">
+                Backend Logs
+              </span>
+              {showLogsOnMobile ? (
+                <ChevronDown className="h-4 w-4 text-terminal-fg" />
+              ) : (
+                <ChevronUp className="h-4 w-4 text-terminal-fg" />
+              )}
+            </button>
+
+            <div
+              className={`${showLogsOnMobile ? "h-48" : "h-0 overflow-hidden"} md:h-full transition-all duration-300`}
+            >
+              <BackendLogs logs={logs} />
+            </div>
           </div>
         </div>
 
         {/* Right side: Project Browser */}
-        <ProjectBrowser
-          currentPath={currentPath}
-          onPathChange={setCurrentPath}
-          onOpenFile={handleOpenFile}
-        />
+        <div className="hidden md:block">
+          <ProjectBrowser
+            currentPath={currentPath}
+            onPathChange={setCurrentPath}
+            onOpenFile={handleOpenFile}
+          />
+        </div>
       </div>
 
       {markdownView && (

@@ -24,6 +24,7 @@ const bootMessages = [
   { text: "  backend logger [started]", delay: 80 },
   { text: "  markdown renderer [started]", delay: 80 },
   { text: "", delay: 100 },
+  { text: "System ready.", delay: 200 },
 ];
 
 export function BootAnimation({ onComplete }: BootAnimationProps) {
@@ -32,7 +33,7 @@ export function BootAnimation({ onComplete }: BootAnimationProps) {
 
   useEffect(() => {
     if (currentIndex >= bootMessages.length) {
-      setTimeout(onComplete, 800);
+      setTimeout(onComplete, 500);
       return;
     }
 
@@ -46,7 +47,7 @@ export function BootAnimation({ onComplete }: BootAnimationProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-terminal-bg">
-      <div className="w-full max-w-3xl space-y-1 px-8 font-mono text-sm">
+      <div className="w-full max-w-3xl space-y-1 px-4 sm:px-8 font-mono text-xs sm:text-sm">
         {messages.map((msg, idx) => (
           <div
             key={idx}
