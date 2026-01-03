@@ -5,7 +5,7 @@ import * as skills from "@/content/skills.md";
 import * as techStack from "@/content/technologies.md";
 import * as attackCopilot from "@/content/projects/attack-copilot.md";
 import * as synaptic from "@/content/projects/synaptic.md";
-import * as projectDocQa from "@/content/projects/document-qa.md";
+import * as assistant from "@/content/projects/assistant.md";
 
 export interface FileNode {
   name: string;
@@ -74,14 +74,14 @@ export const filesystem: FileNode = {
           ],
         },
         {
-          name: "document-qa",
+          name: "assistant",
           type: "directory",
-          metadata: projectDocQa.metadata,
+          metadata: assistant.metadata,
           children: [
             {
               name: "README.md",
               type: "file",
-              content: projectDocQa.content,
+              content: assistant.content,
             },
           ],
         },

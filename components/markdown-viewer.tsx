@@ -53,7 +53,7 @@ export function MarkdownViewer({
 
         {/* Footer */}
         <div className="px-6 py-3 border-t border-terminal-border bg-terminal-bg/50">
-          <p className="text-terminal-muted text-xs font-mono">
+          <p className="text-gray-400 text-xs font-mono">
             Press ESC or click the X button to close
           </p>
         </div>

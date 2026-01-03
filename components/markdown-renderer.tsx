@@ -95,7 +95,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
             <em className="italic text-terminal-fg">{children}</em>
           ),
           blockquote: ({ children }) => (
-            <blockquote className="my-4 border-l-4 border-terminal-accent pl-4 italic text-terminal-muted">
+            <blockquote className="my-4 border-l-4 border-terminal-accent pl-4 italic text-gray-400">
               {children}
             </blockquote>
           ),

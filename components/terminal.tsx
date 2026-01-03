@@ -232,9 +232,7 @@ export function Terminal({ onPathChange, onRunProject, onLog }: TerminalProps) {
 
         {suggestions.length > 0 && (
           <div className="relative z-50 mt-2 rounded border border-terminal-border bg-terminal-bg/95 p-2 backdrop-blur shadow-lg">
-            <div className="text-xs text-terminal-muted mb-1">
-              Suggestions (press Tab):
-            </div>
+            <div className="text-xs white mb-1">Suggestions (press Tab):</div>
             {suggestions.slice(0, 5).map((sugg, idx) => (
               <div
                 key={idx}

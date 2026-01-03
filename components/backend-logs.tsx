@@ -52,7 +52,7 @@ export function BackendLogs({ logs }: BackendLogsProps) {
       >
         {logs.map((log, idx) => (
           <div key={idx} className="mb-1 flex gap-2">
-            <span className="text-terminal-muted shrink-0">
+            <span className="text-gray-400 shrink-0">
               {new Date(log.timestamp).toLocaleTimeString()}
             </span>
             <span className={`${getLevelColor(log.level)} shrink-0 font-bold`}>

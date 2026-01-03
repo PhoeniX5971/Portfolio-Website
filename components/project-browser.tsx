@@ -58,7 +58,7 @@ export function ProjectBrowser({
           style={{ paddingLeft: `${depth * 12 + 8 + depthOffset}px` }}
         >
           {node.type === "directory" && (
-            <span className="text-terminal-muted">
+            <span className="text-gray-400">
               {isExpanded ? (
                 <ChevronDown className="h-3 w-3" />
               ) : (
@@ -69,7 +69,7 @@ export function ProjectBrowser({
           {node.type === "directory" ? (
             <FolderIcon className="h-4 w-4 text-terminal-accent" />
           ) : (
-            <FileIcon className="h-4 w-4 text-terminal-muted" />
+            <FileIcon className="h-4 w-4 text-gray-400" />
           )}
           <span className="truncate">{node.name}</span>
           {node.metadata?.runnable && (
@@ -97,9 +97,7 @@ export function ProjectBrowser({
         <h3 className="font-mono text-xs font-semibold uppercase text-terminal-fg">
           File Browser
         </h3>
-        <p className="mt-1 font-mono text-xs text-terminal-muted">
-          {currentPath}
-        </p>
+        <p className="mt-1 font-mono text-xs text-gray-400">{currentPath}</p>
       </div>
       <div className="terminal-scrollbar flex-1 overflow-y-auto p-2">
         {rootNode && rootNode.children && (

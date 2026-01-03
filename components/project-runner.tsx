@@ -1,24 +1,27 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect, type KeyboardEvent } from "react"
-import { SendIcon, XIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { MarkdownRenderer } from "./markdown-renderer"
+import { useState, useRef, useEffect, type KeyboardEvent } from "react";
+import { SendIcon, XIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MarkdownRenderer } from "./markdown-renderer";
 
 interface ProjectRunnerProps {
   metadata: {
-    description: string
-    apiEndpoint?: string
-    tags?: string[]
-  }
-  onExit: () => void
-  onLog: (message: string, level: "info" | "success" | "warning" | "error") => void
+    description: string;
+    apiEndpoint?: string;
+    tags?: string[];
+  };
+  onExit: () => void;
+  onLog: (
+    message: string,
+    level: "info" | "success" | "warning" | "error",
+  ) => void;
 }
 
 interface Message {
-  role: "user" | "assistant" | "system"
-  content: string
-  timestamp: Date
+  role: "user" | "assistant" | "system";
+  content: string;
+  timestamp: Date;
 }
 
 export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
@@ -28,122 +31,121 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
       content: `Project: ${metadata.description}\nType your messages to interact with the AI. Type "exit" to return to terminal.`,
       timestamp: new Date(),
     },
-  ])
-  const [input, setInput] = useState("")
-  const [isProcessing, setIsProcessing] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  ]);
+  const [input, setInput] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages])
+  }, [messages]);
 
   useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
-
-  const simulateAIResponse = async (userMessage: string) => {
-    // Simulate backend processing with logs
-    onLog("Received user input", "info")
-    await sleep(100)
-
-    onLog("Running guardrails check...", "info")
-    await sleep(200)
-    onLog("✓ Content safety validated", "success")
-
-    onLog("Checking cache for similar queries...", "info")
-    await sleep(150)
-    onLog("Cache miss - proceeding with RAG", "warning")
-
-    onLog("Generating embeddings for query...", "info")
-    await sleep(200)
-    onLog("✓ Embeddings generated (768 dimensions)", "success")
-
-    onLog("Performing vector search in knowledge base...", "info")
-    await sleep(250)
-    onLog("✓ Retrieved 5 relevant documents", "success")
-
-    onLog("Augmenting prompt with context...", "info")
-    await sleep(150)
-
-    onLog("Sending request to LLM...", "info")
-    await sleep(300)
-    onLog("✓ LLM response received (234 tokens)", "success")
-
-    onLog("Applying output filters...", "info")
-    await sleep(100)
-    onLog("✓ Output validated", "success")
-
-    onLog("Caching response for future queries...", "info")
-    await sleep(100)
-    onLog("✓ Response cached", "success")
-
-    // Generate a mock response
-    const responses = [
-      `I understand you're asking about "${userMessage.slice(0, 50)}". Based on the knowledge base, I can provide relevant information retrieved through RAG (Retrieval-Augmented Generation).`,
-      `Great question! The system has processed your query and retrieved contextual information to provide an accurate response about "${userMessage.slice(0, 40)}".`,
-      `Let me help you with that. After searching through the vector database and retrieving relevant context, here's what I found about your query.`,
-    ]
-
-    return responses[Math.floor(Math.random() * responses.length)]
-  }
-
-  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+    inputRef.current?.focus();
+  }, []);
 
   const handleSend = async () => {
-    const trimmed = input.trim()
-    if (!trimmed || isProcessing) return
+    const trimmed = input.trim();
+    if (!trimmed || isProcessing) return;
 
-    // Check for exit command
     if (trimmed.toLowerCase() === "exit") {
-      onExit()
-      return
+      onExit();
+      return;
     }
 
-    // Add user message
     const userMessage: Message = {
       role: "user",
       content: trimmed,
       timestamp: new Date(),
-    }
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-    setIsProcessing(true)
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsProcessing(true);
 
     try {
-      // Simulate AI processing
-      const response = await simulateAIResponse(trimmed)
+      const apiEndpoint = "/api/projects/assistant";
 
-      // Add assistant message
+      onLog("Sending request to backend...", "info");
+
+      const response = await fetch(apiEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: trimmed,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.logs && Array.isArray(data.logs)) {
+        for (const log of data.logs) {
+          onLog(
+            log.message,
+            log.type as "info" | "success" | "warning" | "error",
+          );
+        }
+      }
+
+      if (!data.success || !response.ok) {
+        throw new Error(data.error || "Failed to get response");
+      }
+
       const assistantMessage: Message = {
         role: "assistant",
-        content: response,
+        content: data.response,
         timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      if (data.metadata) {
+        const meta = data.metadata;
+        if (meta.tokens) onLog(`Token usage: ${meta.tokens}`, "info");
+        if (meta.documents_retrieved)
+          onLog(`Documents retrieved: ${meta.documents_retrieved}`, "info");
+        if (meta.processing_time_ms)
+          onLog(`Processing time: ${meta.processing_time_ms}ms`, "info");
       }
-      setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
-      onLog(`Error: ${error}`, "error")
+      onLog(
+        `Error: ${error instanceof Error ? error.message : String(error)}`,
+        "error",
+      );
+
+      const errorMessage: Message = {
+        role: "assistant",
+        content:
+          "Sorry, I encountered an error processing your request. Please try again.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+      e.preventDefault();
+      handleSend();
     }
-  }
+  };
 
   return (
     <div className="flex h-full flex-col bg-terminal-bg">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-terminal-border px-4 py-3">
         <div>
-          <h3 className="font-mono text-sm font-semibold text-terminal-fg">Project Shell</h3>
-          <p className="mt-0.5 font-mono text-xs text-terminal-muted">{metadata.description}</p>
+          <h3 className="font-mono text-sm font-semibold text-terminal-fg">
+            Project Shell
+          </h3>
+          <p className="mt-0.5 font-mono text-xs text-gray-400">
+            {metadata.description}
+          </p>
         </div>
         <Button
           onClick={onExit}
@@ -157,27 +159,44 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="terminal-scrollbar flex-1 overflow-y-auto p-4">
+      <div
+        ref={scrollRef}
+        className="terminal-scrollbar flex-1 overflow-y-auto p-4"
+      >
         {messages.map((msg, idx) => (
           <div key={idx} className="mb-4">
             {msg.role === "system" ? (
               <div className="rounded border border-terminal-accent/30 bg-terminal-accent/5 p-3">
-                <div className="mb-1 font-mono text-xs font-semibold uppercase text-terminal-accent">System</div>
-                <div className="whitespace-pre-wrap font-mono text-sm text-terminal-fg">{msg.content}</div>
+                <div className="mb-1 font-mono text-xs font-semibold uppercase text-terminal-accent">
+                  System
+                </div>
+                <div className="whitespace-pre-wrap font-mono text-sm text-terminal-fg">
+                  {msg.content}
+                </div>
               </div>
             ) : msg.role === "user" ? (
               <div className="ml-8 rounded bg-terminal-border/30 p-3">
                 <div className="mb-1 flex items-center justify-between">
-                  <span className="font-mono text-xs font-semibold text-terminal-success">You</span>
-                  <span className="font-mono text-xs text-terminal-muted">{msg.timestamp.toLocaleTimeString()}</span>
+                  <span className="font-mono text-xs font-semibold text-terminal-success">
+                    You
+                  </span>
+                  <span className="font-mono text-xs text-gray-400">
+                    {msg.timestamp.toLocaleTimeString()}
+                  </span>
                 </div>
-                <div className="whitespace-pre-wrap font-mono text-sm text-terminal-fg">{msg.content}</div>
+                <div className="whitespace-pre-wrap font-mono text-sm text-terminal-fg">
+                  {msg.content}
+                </div>
               </div>
             ) : (
               <div className="mr-8 rounded bg-terminal-accent/10 p-3">
                 <div className="mb-1 flex items-center justify-between">
-                  <span className="font-mono text-xs font-semibold text-terminal-accent">AI Assistant</span>
-                  <span className="font-mono text-xs text-terminal-muted">{msg.timestamp.toLocaleTimeString()}</span>
+                  <span className="font-mono text-xs font-semibold text-terminal-accent">
+                    AI Assistant
+                  </span>
+                  <span className="font-mono text-xs text-gray-400">
+                    {msg.timestamp.toLocaleTimeString()}
+                  </span>
                 </div>
                 <div className="prose prose-invert prose-sm max-w-none">
                   <MarkdownRenderer content={msg.content} />
@@ -189,12 +208,16 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
 
         {isProcessing && (
           <div className="mr-8 rounded bg-terminal-accent/10 p-3">
-            <div className="mb-1 font-mono text-xs font-semibold text-terminal-accent">AI Assistant</div>
+            <div className="mb-1 font-mono text-xs font-semibold text-terminal-accent">
+              AI Assistant
+            </div>
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 animate-pulse rounded-full bg-terminal-accent" />
               <div className="h-2 w-2 animate-pulse rounded-full bg-terminal-accent delay-75" />
               <div className="h-2 w-2 animate-pulse rounded-full bg-terminal-accent delay-150" />
-              <span className="ml-2 font-mono text-sm text-terminal-muted">Processing...</span>
+              <span className="ml-2 font-mono text-sm text-gray-400">
+                Processing...
+              </span>
             </div>
           </div>
         )}
@@ -212,7 +235,7 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
             onKeyDown={handleKeyDown}
             disabled={isProcessing}
             placeholder='Type your message or "exit" to return...'
-            className="flex-1 bg-transparent font-mono text-sm text-terminal-fg outline-none placeholder:text-terminal-muted disabled:opacity-50"
+            className="flex-1 bg-transparent font-mono text-sm text-terminal-fg outline-none placeholder:text-gray-400 disabled:opacity-50"
             spellCheck={false}
           />
           <Button
@@ -225,10 +248,11 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
             Send
           </Button>
         </div>
-        <div className="mt-2 font-mono text-xs text-terminal-muted">
-          Press Enter to send • Watch the backend logs below for processing details
+        <div className="mt-2 font-mono text-xs text-gray-400">
+          Press Enter to send • Watch the backend logs below for processing
+          details
         </div>
       </div>
     </div>
-  )
+  );
 }
