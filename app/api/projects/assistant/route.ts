@@ -34,8 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const backendUrl =
-      process.env.PYTHON_BACKEND_URL || "http://127.0.0.1:8000";
+    const backendUrl = "https://phoenix5971-portfolio-assistant.vercel.app";
 
     // Authentication: Sign JWT using RS256
     const privateKeyContent = await fs.readFile(
