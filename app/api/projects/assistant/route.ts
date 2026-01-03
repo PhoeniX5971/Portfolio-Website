@@ -1,5 +1,8 @@
 import type { NextRequest } from "next/server";
 import { checkRateLimit } from "@/lib/security";
+import * as jose from "jose";
+import fs from "fs/promises";
+import path from "path";
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,6 +37,18 @@ export async function POST(request: NextRequest) {
     const backendUrl =
       process.env.PYTHON_BACKEND_URL || "http://127.0.0.1:8000";
 
+    // Authentication: Sign JWT using RS256
+    const privateKeyContent = await fs.readFile(
+      path.join(process.cwd(), "security/private_pkcs8.pem"),
+      "utf-8",
+    );
+    const privateKey = await jose.importPKCS8(privateKeyContent, "RS256");
+    const token = await new jose.SignJWT({ iss: "next-app" })
+      .setProtectedHeader({ alg: "RS256" })
+      .setIssuedAt()
+      .setExpirationTime("1m") // Short lived token
+      .sign(privateKey);
+
     // 2. Fetch from Python with a clear timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
@@ -43,6 +58,7 @@ export async function POST(request: NextRequest) {
       headers: {
         "Content-Type": "application/json",
         "x-session-id": sessionId,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ message: body.message }),
       signal: controller.signal,
