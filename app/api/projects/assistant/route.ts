@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { checkRateLimit } from "@/lib/security";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +12,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Security Checks
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const ip = forwardedFor ? forwardedFor.split(",")[0] : "127.0.0.1";
+    const sessionId = request.headers.get("x-session-id") || "unknown";
+
+    const securityCheck = await checkRateLimit(ip, sessionId);
+
+    if (!securityCheck.allowed) {
+      console.warn(`Security Block (${ip}): ${securityCheck.reason}`);
+      return Response.json(
+        {
+          success: false,
+          error: securityCheck.error,
+          logs: [{ type: "error", message: `⛔ ${securityCheck.error}` }],
+        },
+        { status: securityCheck.reason === "ban" ? 403 : 429 },
+      );
+    }
+
     const backendUrl =
       process.env.PYTHON_BACKEND_URL || "http://127.0.0.1:8000";
 
@@ -20,29 +40,44 @@ export async function POST(request: NextRequest) {
 
     const response = await fetch(`${backendUrl}/api/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-session-id": sessionId,
+      },
       body: JSON.stringify({ message: body.message }),
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
 
-    // 3. Check if response is actually JSON before parsing
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      const text = await response.text();
-      console.error("Non-JSON response from Python:", text);
-      throw new Error("Backend sent non-JSON response");
+    if (!response.body) {
+      throw new Error("No response body from backend");
     }
 
-    const data = await response.json();
-    return Response.json(data);
+    // Proxy the stream directly
+    return new Response(response.body, {
+      headers: {
+        "Content-Type": "application/x-ndjson",
+        "Transfer-Encoding": "chunked",
+      },
+    });
   } catch (error: any) {
+    if (error.name === "AbortError") {
+      console.error("Assistant API Timeout");
+      return Response.json(
+        {
+          success: false,
+          error: "Request timed out",
+          logs: [{ type: "error", message: "✗ Request timed out" }],
+        },
+        { status: 504 },
+      );
+    }
     console.error("Assistant API Error:", error.message);
     return Response.json(
       {
         success: false,
-        response: "Connection error between Next.js and Python.",
+        error: error.message,
         logs: [{ type: "error", message: `✗ ${error.message}` }],
       },
       { status: 500 },

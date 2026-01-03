@@ -58,7 +58,9 @@ export function BackendLogs({ logs }: BackendLogsProps) {
             <span className={`${getLevelColor(log.level)} shrink-0 font-bold`}>
               [{log.level.toUpperCase()}]
             </span>
-            <span className="text-terminal-fg break-words">{log.message}</span>
+            <span className="text-terminal-fg wrap-break-word">
+              {log.message}
+            </span>
           </div>
         ))}
       </div>

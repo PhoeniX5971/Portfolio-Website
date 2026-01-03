@@ -28,7 +28,7 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "system",
-      content: `Project: ${metadata.description}\nType your messages to interact with the AI. Type "exit" to return to terminal.`,
+      content: `Project: ${metadata.description}\n\n⚠️ GUIDELINES:\n1. Do not overuse the AI.\n2. Sending >1 request/second will result in an INSTANT BAN.\n3. There is a 5-second cooldown between messages.\n\nType your messages to interact with the AI. Type "exit" to return to terminal.`,
       timestamp: new Date(),
     },
   ]);
@@ -45,6 +45,15 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
 
   useEffect(() => {
     inputRef.current?.focus();
+  }, []);
+
+  // Generate or retrieve Session ID
+  useEffect(() => {
+    let sid = sessionStorage.getItem("assistant_session_id");
+    if (!sid) {
+      sid = crypto.randomUUID();
+      sessionStorage.setItem("assistant_session_id", sid);
+    }
   }, []);
 
   const handleSend = async () => {
@@ -67,6 +76,8 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
 
     try {
       const apiEndpoint = "/api/projects/assistant";
+      const sessionId =
+        sessionStorage.getItem("assistant_session_id") || "unknown";
 
       onLog("Sending request to backend...", "info");
 
@@ -74,41 +85,54 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-session-id": sessionId,
         },
         body: JSON.stringify({
           message: trimmed,
         }),
       });
 
-      const data = await response.json();
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No reader available");
 
-      if (data.logs && Array.isArray(data.logs)) {
-        for (const log of data.logs) {
-          onLog(
-            log.message,
-            log.type as "info" | "success" | "warning" | "error",
-          );
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const event = JSON.parse(line);
+            if (event.type === "log") {
+              onLog(
+                event.data.message,
+                event.data.type as "info" | "success" | "warning" | "error",
+              );
+            } else if (event.type === "message") {
+              setMessages((prev) => [
+                ...prev,
+                {
+                  role: "assistant",
+                  content: event.data,
+                  timestamp: new Date(),
+                },
+              ]);
+            }
+          } catch (e) {
+            console.error("Error parsing stream line:", line, e);
+          }
         }
       }
 
-      if (!data.success || !response.ok) {
-        throw new Error(data.error || "Failed to get response");
-      }
-
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data.response,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      if (data.metadata) {
-        const meta = data.metadata;
-        if (meta.tokens) onLog(`Token usage: ${meta.tokens}`, "info");
-        if (meta.documents_retrieved)
-          onLog(`Documents retrieved: ${meta.documents_retrieved}`, "info");
-        if (meta.processing_time_ms)
-          onLog(`Processing time: ${meta.processing_time_ms}ms`, "info");
+      if (!response.ok) {
+        throw new Error("Stream ended with error status");
       }
     } catch (error) {
       onLog(
@@ -124,7 +148,8 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
-      setIsProcessing(false);
+      // Security Cooldown: 5 seconds
+      setTimeout(() => setIsProcessing(false), 5000);
     }
   };
 
