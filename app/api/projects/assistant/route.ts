@@ -34,13 +34,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const backendUrl = "https://phoenix5971-portfolio-assistant.vercel.app";
+    const backendUrl =
+      process.env.PYTHON_BACKEND_URL || "http://127.0.0.1:8000";
 
     // Authentication: Sign JWT using RS256
-    const privateKeyContent = await fs.readFile(
-      path.join(process.cwd(), "security/private_pkcs8.pem"),
-      "utf-8",
-    );
+    let privateKeyContent = process.env.AI_PRIVATE_KEY;
+
+    if (!privateKeyContent) {
+      try {
+        privateKeyContent = await fs.readFile(
+          path.join(process.cwd(), "security/private_pkcs8.pem"),
+          "utf-8",
+        );
+      } catch (error) {
+        console.error("Failed to load private key:", error);
+        return Response.json(
+          {
+            success: false,
+            error: "Server Configuration Error: Missing Private Key",
+          },
+          { status: 500 },
+        );
+      }
+    }
+
+    // Fix: Ensure standard PEM formatting if it comes from a single-line env var
+    privateKeyContent = privateKeyContent.replace(/\\n/g, "\n");
+
     const privateKey = await jose.importPKCS8(privateKeyContent, "RS256");
     const token = await new jose.SignJWT({ iss: "next-app" })
       .setProtectedHeader({ alg: "RS256" })
