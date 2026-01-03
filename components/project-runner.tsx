@@ -34,6 +34,7 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
   ]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCooldown, setIsCooldown] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -41,7 +42,7 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isProcessing, isCooldown]);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -58,7 +59,7 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
 
   const handleSend = async () => {
     const trimmed = input.trim();
-    if (!trimmed || isProcessing) return;
+    if (!trimmed || isProcessing || isCooldown) return;
 
     if (trimmed.toLowerCase() === "exit") {
       onExit();
@@ -148,8 +149,9 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
-      // Security Cooldown: 5 seconds
-      setTimeout(() => setIsProcessing(false), 5000);
+      setIsProcessing(false);
+      setIsCooldown(true);
+      setTimeout(() => setIsCooldown(false), 5000);
     }
   };
 
@@ -258,24 +260,33 @@ export function ProjectRunner({ metadata, onExit, onLog }: ProjectRunnerProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isProcessing}
-            placeholder='Type your message or "exit" to return...'
+            disabled={isProcessing || isCooldown}
+            placeholder={
+              isCooldown
+                ? "Cooldown active..."
+                : 'Type your message or "exit" to return...'
+            }
             className="flex-1 bg-transparent font-mono text-sm text-terminal-fg outline-none placeholder:text-gray-400 disabled:opacity-50"
             spellCheck={false}
           />
           <Button
             onClick={handleSend}
-            disabled={!input.trim() || isProcessing}
+            disabled={!input.trim() || isProcessing || isCooldown}
             size="sm"
-            className="gap-2 bg-terminal-accent text-terminal-bg hover:bg-terminal-accent/80"
+            className="gap-2 bg-terminal-accent text-terminal-bg hover:bg-terminal-accent/80 disabled:opacity-50"
           >
             <SendIcon className="h-4 w-4" />
-            Send
+            {isCooldown ? "Wait" : "Send"}
           </Button>
         </div>
         <div className="mt-2 font-mono text-xs text-gray-400">
-          Press Enter to send • Watch the backend logs below for processing
-          details
+          {isCooldown ? (
+            <span className="text-terminal-warning">
+              ⏳ Please wait before sending another message...
+            </span>
+          ) : (
+            "Press Enter to send • Watch the backend logs below for processing details"
+          )}
         </div>
       </div>
     </div>

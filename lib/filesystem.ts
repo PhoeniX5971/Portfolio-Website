@@ -88,12 +88,12 @@ export const filesystem: FileNode = {
       ],
     },
     {
-      name: "skills",
+      name: "skills.md",
       type: "file",
       content: skills.content,
     },
     {
-      name: "technologies",
+      name: "technologies.md",
       type: "file",
       content: techStack.content,
     },
