@@ -34,8 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const backendUrl =
-      process.env.PYTHON_BACKEND_URL || "http://127.0.0.1:8000";
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL!;
 
     // Authentication: Sign JWT using RS256
     let privateKeyContent = process.env.AI_PRIVATE_KEY;
