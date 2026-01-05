@@ -57,8 +57,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fix: Ensure standard PEM formatting if it comes from a single-line env var
-    privateKeyContent = privateKeyContent.replace(/\\n/g, "\n");
+    // Fix: Decode Base64 if needed, otherwise use as is (assuming PEM format)
+    if (privateKeyContent && !privateKeyContent.includes("-----BEGIN PRIVATE KEY-----")) {
+      try {
+        privateKeyContent = Buffer.from(privateKeyContent, 'base64').toString('utf-8');
+      } catch (e) {
+        console.error("Failed to decode Base64 private key", e);
+      }
+    }
 
     const privateKey = await jose.importPKCS8(privateKeyContent, "RS256");
     const token = await new jose.SignJWT({ iss: "next-app" })
